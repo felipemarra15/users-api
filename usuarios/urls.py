@@ -1,7 +1,8 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+from .views import UsuarioViewSet
+from rest_framework import routers
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('usuarios.urls')),  # ✅ incluye las rutas de tu app
-]
+router = routers.DefaultRouter()
+router.register(r'usuarios', UsuarioViewSet)
+
+urlpatterns = router.urls
