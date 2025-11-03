@@ -75,10 +75,15 @@ WSGI_APPLICATION = 'proyecto.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'registrodb',
+        'USER': 'postgres',
+        'PASSWORD': '1234',
+        'HOST': '172.29.144.1',  # 👈 tu IP de Windows desde WSL
+        'PORT': '5432',
     }
 }
+
 
 
 # Password validation
