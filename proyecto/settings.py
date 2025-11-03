@@ -38,9 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',  # <--- para la API REST
+    'usuarios', # <--- tu app
+    'corsheaders',       
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -126,3 +131,21 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOW_ALL_ORIGINS = True
+
+# --- CONFIGURACIÓN DE CORREO (TurboSMTP) ---
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "pro.turbo-smtp.com"
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False  # TurboSMTP usa TLS en el puerto 587
+EMAIL_USE_SSL = True  # (solo si usaras el puerto 465, pero no mezcles ambos)
+
+# ⚠️ Reemplazá con tus credenciales reales de TurboSMTP:
+EMAIL_HOST_USER = "2261e7cd12c99b4e36e4c423569dc33d"       # <- Consumer Key (desde TurboSMTP)
+EMAIL_HOST_PASSWORD = "a6wtf5O8z3Y107dLrsnbZDuV4ejmB9Xy"  # <- Consumer Secret (desde TurboSMTP)
+
+# El remitente que verá el usuario (puede ser el mismo que el EMAIL_HOST_USER)
+DEFAULT_FROM_EMAIL = "crisreyvpi123@gmail.com"
+
+
+
