@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: users-config
+  namespace: prod
+data:
+  NOTIFY_URL: "http://notification-service:5000/notify"
+  DJANGO_ALLOWED_HOSTS: "*"

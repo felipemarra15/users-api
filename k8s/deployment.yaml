@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-api-deployment
+  namespace: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-api
+  template:
+    metadata:
+      labels:
+        app: users-api
+    spec:
+      containers:
+      - name: users
+        image: 044197873138.dkr.ecr.us-east-1.amazonaws.com/users-api-service:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: NOTIFY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: users-config
+              key: NOTIFY_URL
+        - name: DJANGO_ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: users-config
+              key: DJANGO_ALLOWED_HOSTS
+        - name: DB_NAME
+          valueFrom: { secretKeyRef: { name: db-secret, key: DB_NAME } }
+        - name: DB_USER
+          valueFrom: { secretKeyRef: { name: db-secret, key: DB_USER } }
+        - name: DB_PASS
+          valueFrom: { secretKeyRef: { name: db-secret, key: DB_PASS } }
+        - name: DB_HOST
+          valueFrom: { secretKeyRef: { name: db-secret, key: DB_HOST } }
+        - name: DB_PORT
+          valueFrom: { secretKeyRef: { name: db-secret, key: DB_PORT } }
