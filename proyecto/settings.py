@@ -82,8 +82,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'registrodb',
         'USER': 'postgres',
-        'PASSWORD': 'utec',
-        'HOST': 'localhost',
+        'PASSWORD': '1234',
+        'HOST': '172.29.144.1',
         'PORT': '5432',
     }
 }
