@@ -2,8 +2,11 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .models import Usuario
 from .serializers import UsuarioSerializer
-from django.core.mail import send_mail
-from django.conf import settings
+import os
+import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
@@ -14,26 +17,15 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         usuario = serializer.save()
 
-        # --- Envío del correo ---
+        # ---- Enviar evento al microservicio de notificaciones ----
+        notify_url = os.getenv("NOTIFY_URL", "http://notification-service:5000/notify")
+        payload = {"nombre": usuario.nombre, "email": usuario.mail}
+
         try:
-            asunto = "🎉 Bienvenido al sistema"
-            mensaje = f"Hola {usuario.nombre}, tu registro fue exitoso.\n\nGracias por registrarte."
-            destinatario = [usuario.mail]
-
-            send_mail(
-                asunto,
-                mensaje,
-                settings.DEFAULT_FROM_EMAIL,
-                destinatario,
-                fail_silently=False  # si hay error, lo mostramos abajo
-            )
-
+            resp = requests.post(notify_url, json=payload, timeout=3)
+            resp.raise_for_status()
         except Exception as e:
-            # ⚠️ no rompe el registro, pero lo loguea
-            print(f"Error enviando correo a {usuario.mail}: {e}")
-            return Response(
-                {"detail": f"Usuario registrado, pero error al enviar correo: {str(e)}"},
-                status=status.HTTP_201_CREATED
-            )
+            # No rompemos el alta si falla la notificación
+            logger.warning("Fallo al notificar alta de usuario %s: %s", usuario.mail, e)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
