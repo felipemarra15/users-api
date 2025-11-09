@@ -2,8 +2,8 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .models import Usuario
 from .serializers import UsuarioSerializer
-from django.core.mail import send_mail
-from django.conf import settings
+import os
+import requests  # HTTP al microservicio
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
@@ -14,26 +14,28 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         usuario = serializer.save()
 
-        # --- Envío del correo ---
+        # URL del microservicio de notificaciones (env var o default para K8s)
+        notify_url = os.getenv(
+            "NOTIFY_URL",
+            "http://notification-service.default.svc.cluster.local:8080/notify"
+        )
+
+        # Payload normalizado: 'telefono' siempre como string (o None)
+        telefono_value = getattr(usuario, "telefono", None)
+        payload = {
+            "nombre": usuario.nombre,
+            "mail": usuario.mail,  # clave esperada por el notification-service
+            "telefono": (None if telefono_value is None else str(telefono_value))
+        }
+
+        # Llamada desacoplada: si falla la notificación, el alta igual queda en 201
         try:
-            asunto = "🎉 Bienvenido al sistema"
-            mensaje = f"Hola {usuario.nombre}, tu registro fue exitoso.\n\nGracias por registrarte."
-            destinatario = [usuario.mail]
-
-            send_mail(
-                asunto,
-                mensaje,
-                settings.DEFAULT_FROM_EMAIL,
-                destinatario,
-                fail_silently=False  # si hay error, lo mostramos abajo
-            )
-
+            print("[notify] envío:", payload)  # debug
+            r = requests.post(notify_url, json=payload, timeout=5)
+            print("[notify] resp:", r.status_code, r.text[:500])  # debug
+            r.raise_for_status()
         except Exception as e:
-            # ⚠️ no rompe el registro, pero lo loguea
-            print(f"Error enviando correo a {usuario.mail}: {e}")
-            return Response(
-                {"detail": f"Usuario registrado, pero error al enviar correo: {str(e)}"},
-                status=status.HTTP_201_CREATED
-            )
+            # No rompemos el alta si falla la notificación
+            print(f"[notify] error llamando a {notify_url}: {e}")
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
