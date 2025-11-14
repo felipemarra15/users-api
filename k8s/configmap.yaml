@@ -1,0 +1,9 @@
+# users-api/k8s/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: users-config
+  namespace: prod
+data:
+  NOTIFY_URL: "http://notification-service.prod.svc.cluster.local:8080/notify"
+  DJANGO_ALLOWED_HOSTS: "*"

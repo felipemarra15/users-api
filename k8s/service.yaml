@@ -1,0 +1,16 @@
+# users-api/k8s/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-api
+  namespace: prod
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"  # NLB interno
+spec:
+  selector:
+    app: users-api
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
