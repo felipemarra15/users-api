@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: users-api
-        image: 147227386153.dkr.ecr.us-east-1.amazonaws.com/users-api:latest
+        image: 757054385635.dkr.ecr.us-east-1.amazonaws.com/users-api:latest
         ports:
         - containerPort: 8000
         env:
@@ -46,18 +46,37 @@ spec:
             secretKeyRef:
               name: users-db-secret
               key: DB_PASS
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8000
-          initialDelaySeconds: 15
-          periodSeconds: 20
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: users-api-config
+              key: DEBUG
+        - name: ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: users-api-config
+              key: ALLOWED_HOSTS
+        - name: NOTIFY_URL
+          value: "http://notification-service.app.svc.cluster.local:9000/notify"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        # readinessProbe:
+        #   httpGet:
+        #     path: /healthz
+        #     port: 8000
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 10
+        # livenessProbe:
+        #   httpGet:
+        #     path: /healthz
+        #     port: 8000
+        #   initialDelaySeconds: 15
+        #   periodSeconds: 20
 ---
 apiVersion: v1
 kind: Service

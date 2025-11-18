@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: users-api-config
+  namespace: app
+  labels:
+    app: users-api
+data:
+  # Configuraciones generales no sensibles
+  DEBUG: "False"
+  ALLOWED_HOSTS: "*"
